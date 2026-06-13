@@ -8,22 +8,6 @@
 ![Version](https://img.shields.io/badge/Version-2.0.0-green.svg)
 ![Status](https://img.shields.io/badge/Status-stable-green.svg)
 
-## Table of Contents
-
-- [About](#-about)
-- [Features](#-features)
-- [Installation](#-installation)
-- [Usage](#-usage)
-- [API Documentation](#-api-documentation)
-- [Testing](#-testing)
-- [Deployment](#-deployment)
-- [Roadmap](#-roadmap)
-- [FAQ](#-frequently-asked-questions)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Author](#-author)
-- [Support](#-support)
-
 ## About
 
 ![Stars](https://img.shields.io/github/stars/yourusername/readmeflow?style=flat-square)
