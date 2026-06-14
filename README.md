@@ -10,11 +10,6 @@
 
 ## About
 
-![Stars](https://img.shields.io/github/stars/yourusername/readmeflow?style=flat-square)
-![Issues](https://img.shields.io/github/issues/yourusername/readmeflow?style=flat-square)
-![Forks](https://img.shields.io/github/forks/yourusername/readmeflow?style=flat-square)
-![PRs](https://img.shields.io/github/issues-pr/yourusername/readmeflow?style=flat-square)
-![Last Commit](https://img.shields.io/github/last-commit/yourusername/readmeflow?style=flat-square)
 
 <!-- Add a screenshot or GIF of your application here -->
 
