@@ -6,13 +6,14 @@ import { usePathname } from 'next/navigation';
 
 export default function Header() {
   const pathname = usePathname();
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === 'undefined') return 'dark';
+    return localStorage.getItem('readmeflow-theme') || 'dark';
+  });
 
   useEffect(() => {
-    const saved = localStorage.getItem('readmeflow-theme') || 'dark';
-    setTheme(saved);
-    document.documentElement.setAttribute('data-theme', saved);
-  }, []);
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark';

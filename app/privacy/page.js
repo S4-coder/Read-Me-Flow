@@ -1,5 +1,5 @@
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
 
 export const metadata = {
   title: 'Privacy',
@@ -46,23 +46,14 @@ export default function PrivacyPage() {
         </section>
 
         <section className="panel" style={{ padding: 0, overflow: 'visible' }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-            gap: '1rem',
-          }}>
+          <div className="content-grid">
             {privacyItems.map((item) => (
               <article
                 key={item.title}
-                style={{
-                  background: 'var(--bg-elevated)',
-                  border: '1px solid var(--border-dim)',
-                  borderRadius: '18px',
-                  padding: '1.25rem',
-                }}
+                className="feature-card"
               >
-                <h2 style={{ fontSize: '18px', marginBottom: '0.5rem' }}>{item.title}</h2>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{item.description}</p>
+                <h2 className="feature-card-title">{item.title}</h2>
+                <p className="feature-card-description">{item.description}</p>
               </article>
             ))}
           </div>

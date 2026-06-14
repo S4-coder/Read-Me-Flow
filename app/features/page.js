@@ -1,5 +1,5 @@
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
 
 export const metadata = {
   title: 'Features',
@@ -46,23 +46,14 @@ export default function FeaturesPage() {
         </section>
 
         <section className="panel" style={{ padding: 0, overflow: 'visible' }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-            gap: '1rem',
-          }}>
+          <div className="content-grid">
             {features.map((feature) => (
               <article
                 key={feature.title}
-                style={{
-                  background: 'var(--bg-elevated)',
-                  border: '1px solid var(--border-dim)',
-                  borderRadius: '18px',
-                  padding: '1.25rem',
-                }}
+                className="feature-card"
               >
-                <h2 style={{ fontSize: '18px', marginBottom: '0.5rem' }}>{feature.title}</h2>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{feature.description}</p>
+                <h2 className="feature-card-title">{feature.title}</h2>
+                <p className="feature-card-description">{feature.description}</p>
               </article>
             ))}
           </div>
