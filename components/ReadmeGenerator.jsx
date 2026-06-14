@@ -1,10 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import Header from './Header';
 import Footer from './Footer';
-import { generateReadme as generateReadmeLib, TECH_STACK_ICONS } from '../../lib/readmeGenerator.browser';
+
+function normalizeRepoInput(input) {
+  if (!input) return {};
+
+  const value = String(input).trim();
+  const match = value.match(/github\.com\/([^/]+)\/([^/?#]+)/);
+
+  if (match) {
+    return {
+      owner: match[1],
+      repo: match[2].replace(/\.git$/, ''),
+    };
+  }
+
+  const parts = value.split('/').filter(Boolean);
+  if (parts.length === 2) {
+    return {
+      owner: parts[0],
+      repo: parts[1].replace(/\.git$/, ''),
+    };
+  }
+
+  return {};
+}
+
+function encodeBase64(text) {
+  const bytes = new TextEncoder().encode(text);
+  let binary = '';
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return window.btoa(binary);
+}
 
 export default function ReadmeGenerator() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -12,16 +44,17 @@ export default function ReadmeGenerator() {
   const [generatedReadme, setGeneratedReadme] = useState('');
   const [projectData, setProjectData] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [committing, setCommitting] = useState(false);
+  const [commitStatus, setCommitStatus] = useState('');
   const [error, setError] = useState('');
   const [previewMode, setPreviewMode] = useState('raw');
-  const [theme, setTheme] = useState(() => {
-    if (typeof window === 'undefined') return 'dark';
+  const [theme, setTheme] = useState('dark');
+
+  useEffect(() => {
     const saved = localStorage.getItem('readmeflow-theme') || 'dark';
-    if (typeof document !== 'undefined') {
-      document.documentElement.setAttribute('data-theme', saved);
-    }
-    return saved;
-  });
+    setTheme(saved);
+    document.documentElement.setAttribute('data-theme', saved);
+  }, []);
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark';
@@ -243,10 +276,88 @@ export default function ReadmeGenerator() {
     element.click();
   };
 
+  const commitReadmeToGitHub = async () => {
+    if (!generatedReadme) {
+      setError('Generate a README before committing.');
+      return;
+    }
+
+    const repo = normalizeRepoInput(searchQuery);
+    if (!repo.owner || !repo.repo) {
+      setError('Enter a GitHub repository first.');
+      return;
+    }
+
+    const token = window.prompt('Enter your GitHub personal access token with repo/file write permission:');
+    if (!token) return;
+
+    const branch = window.prompt('Enter branch name:', 'main') || 'main';
+    const filePath = window.prompt('Enter README file path:', 'README.md') || 'README.md';
+    const message = window.prompt('Enter commit message:', 'Update README with ReadmeFlow') || 'Update README with ReadmeFlow';
+
+    setCommitting(true);
+    setCommitStatus('');
+    setError('');
+
+    try {
+      const apiHeaders = {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      };
+
+      const existingFileRes = await fetch(
+        `https://api.github.com/repos/${repo.owner}/${repo.repo}/contents/${encodeURIComponent(filePath)}`,
+        { headers: apiHeaders }
+      );
+
+      let existingSha;
+      if (existingFileRes.ok) {
+        const existingFile = await existingFileRes.json();
+        existingSha = existingFile.sha;
+      } else if (existingFileRes.status !== 404) {
+        throw new Error('Could not check existing README file.');
+      }
+
+      const commitBody = {
+        message,
+        branch,
+        content: encodeBase64(generatedReadme),
+      };
+
+      if (existingSha) {
+        commitBody.sha = existingSha;
+      }
+
+      const commitRes = await fetch(
+        `https://api.github.com/repos/${repo.owner}/${repo.repo}/contents/${encodeURIComponent(filePath)}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...apiHeaders,
+          },
+          body: JSON.stringify(commitBody),
+        }
+      );
+
+      const commitData = await commitRes.json();
+      if (!commitRes.ok) {
+        throw new Error(commitData.message || 'Failed to commit README.');
+      }
+
+      setCommitStatus(`README committed to ${repo.owner}/${repo.repo} on ${branch}.`);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setCommitting(false);
+    }
+  };
+
   return (
     <div className="layout-root">
       <Header theme={theme} onToggleTheme={toggleTheme} />
-      <div className="workspace">
+      <div className="workspace" style={{ height: 'calc(100vh - 160px)' }}>
         <section className="intro-banner">
           <h1 className="intro-title">Readme Flow</h1>
           <p className="intro-subtitle">
@@ -257,6 +368,7 @@ export default function ReadmeGenerator() {
             <span className="intro-pill">Instant generation</span>
             <span className="intro-pill">Auto tech detection</span>
             <span className="intro-pill">Download .md</span>
+            <span className="intro-pill">GitHub commit</span>
           </div>
         </section>
 
@@ -344,7 +456,7 @@ export default function ReadmeGenerator() {
           )}
         </section>
 
-        <section className="panel">
+        <section className="panel" style={{ overflow: generatedReadme ? 'auto' : 'visible' }}>
           <div className="section-header">
             <div className="section-title">Live Preview</div>
           </div>
@@ -373,11 +485,19 @@ export default function ReadmeGenerator() {
                       📄 Raw
                     </button>
                   </div>
-                  <button type="button" className="btn btn-ghost" onClick={copyToClipboard}>
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={copyToClipboard}>
                     {copied ? '✅ Copied' : '📋 Copy'}
                   </button>
-                  <button type="button" className="btn btn-primary" onClick={downloadReadme}>
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={downloadReadme}>
                     ⬇️ Download
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={commitReadmeToGitHub}
+                    disabled={!generatedReadme || committing}
+                  >
+                    {committing ? 'Committing...' : 'Commit to GitHub'}
                   </button>
                 </div>
               </div>
@@ -399,6 +519,20 @@ export default function ReadmeGenerator() {
               <div className="empty-desc">
                 Enter a GitHub repository and click Generate to preview a curated README in real time.
               </div>
+            </div>
+          )}
+
+          {(commitStatus || error) && (
+            <div
+              className="card card-elevated"
+              style={{
+                marginTop: '1rem',
+                background: commitStatus ? 'rgba(16, 185, 129, 0.08)' : 'rgba(248, 113, 113, 0.08)',
+                borderColor: commitStatus ? 'rgba(16, 185, 129, 0.22)' : 'rgba(248, 113, 113, 0.22)',
+                color: commitStatus ? '#34d399' : '#f87171',
+              }}
+            >
+              {commitStatus || error}
             </div>
           )}
         </section>

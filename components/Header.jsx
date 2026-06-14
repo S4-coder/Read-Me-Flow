@@ -2,16 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function Header() {
-  const [theme, setTheme] = useState(() => {
-    if (typeof window === 'undefined') return 'dark';
-    return localStorage.getItem('readmeflow-theme') || 'dark';
-  });
+  const pathname = usePathname();
+  const [theme, setTheme] = useState('dark');
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
+    const saved = localStorage.getItem('readmeflow-theme') || 'dark';
+    setTheme(saved);
+    document.documentElement.setAttribute('data-theme', saved);
+  }, []);
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark';
@@ -35,13 +36,13 @@ export default function Header() {
         >
           {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
         </button>
-        <Link href="/" className="btn btn-ghost btn-sm">
+        <Link href="/" className={`btn btn-ghost btn-sm ${pathname === '/' ? 'btn-active' : ''}`}>
           Home
         </Link>
-        <Link href="/features" className="btn btn-ghost btn-sm">
+        <Link href="/features" className={`btn btn-ghost btn-sm ${pathname === '/features' ? 'btn-active' : ''}`}>
           Features
         </Link>
-        <Link href="/privacy" className="btn btn-ghost btn-sm">
+        <Link href="/privacy" className={`btn btn-ghost btn-sm ${pathname === '/privacy' ? 'btn-active' : ''}`}>
           Privacy
         </Link>
         <a
