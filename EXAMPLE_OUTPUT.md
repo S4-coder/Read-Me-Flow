@@ -124,9 +124,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 👤 Author
 
 **John Doe**
-- GitHub: [@johndoe](https://github.com/johndoe)
-- Email: john@example.com
-- Portfolio: [johndoe.dev](https://johndoe.dev)
+- GitHub: [@S4-coder](https://github.com/S4-coder)
+- Email: sabeel2311@gmail.com
+
 
 ## 🙏 Acknowledgments
 
@@ -140,7 +140,7 @@ For support, email support@example.com or open an issue on GitHub.
 
 ---
 
-Made with ❤️ by John Doe
+Made with ❤️ by Sabeel Ahmed
 
 ---
 
