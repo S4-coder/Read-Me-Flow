@@ -180,7 +180,7 @@ npm run test:watch
 ### Deploy to Vercel (Recommended)
 
 1. Push your code to GitHub
-2. Visit [vercel.com/new](https://vercel.com/new)
+2. Visit [README FLOW](https://read-me-flow.vercel.app/)
 3. Import your repository
 4. Click **Deploy**
 
