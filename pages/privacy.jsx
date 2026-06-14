@@ -46,11 +46,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="panel" style={{ padding: 0, overflow: 'visible' }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-            gap: '1rem',
-          }}>
+          <div className="privacy-grid">
             {privacyItems.map((item) => (
               <article
                 key={item.title}

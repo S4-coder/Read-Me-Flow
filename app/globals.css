@@ -908,6 +908,28 @@ a:hover {
   margin: 1.25rem 0;
 }
 
+/* ─── Utility: Page grids ─────────────────────────────────── */
+.feature-grid,
+.privacy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .feature-grid,
+  .privacy-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .feature-grid,
+  .privacy-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ─── Utility: Stack spacing ────────────────────────────────── */
 .stack > * + * { margin-top: var(--stack-gap, 1rem); }
 .stack-sm > * + * { margin-top: 0.625rem; }
