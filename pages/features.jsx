@@ -46,7 +46,11 @@ export default function FeaturesPage() {
         </section>
 
         <section className="panel" style={{ padding: 0, overflow: 'visible' }}>
-          <div className="feature-grid">
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+            gap: '1rem',
+          }}>
             {features.map((feature) => (
               <article
                 key={feature.title}
