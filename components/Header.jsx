@@ -10,6 +10,8 @@ const pages = [
   { href: '/privacy', label: 'Privacy' },
 ];
 
+const githubUrl = 'https://github.com/S4-coder/Read-Me-Flow';
+
 export default function Header() {
   const pathname = usePathname();
   const [theme, setTheme] = useState(() => {
@@ -56,9 +58,28 @@ export default function Header() {
           >
             {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
           </button>
+          <div className="nav-page-links">
+            {pages.map((page) => (
+              <Link
+                key={page.href}
+                href={page.href}
+                className={`nav-page-link ${pathname === page.href ? 'nav-page-link-active' : ''}`}
+              >
+                {page.label}
+              </Link>
+            ))}
+            <a
+              href={githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="nav-page-link"
+            >
+              GitHub
+            </a>
+          </div>
           <button
             type="button"
-            className="btn btn-icon"
+            className="btn btn-icon sidebar-toggle"
             onClick={() => setSidebarOpen(true)}
             aria-label="Open navigation"
             title="Open navigation"
@@ -95,7 +116,7 @@ export default function Header() {
                 </Link>
               ))}
               <a
-                href="https://github.com/S4-coder/Read-Me-Flow"
+                href={githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="sidebar-link"
