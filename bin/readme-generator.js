@@ -3,15 +3,22 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
-const { generateReadme } = require('./lib/readmeGenerator');
+const { generateReadme } = require(path.join(__dirname, '../lib/readmeGenerator'));
 
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
+const inputLines = rl[Symbol.asyncIterator]();
+
 function question(query) {
-  return new Promise(resolve => rl.question(query, resolve));
+  if (process.stdin.isTTY) {
+    return new Promise(resolve => rl.question(query, resolve));
+  }
+
+  process.stdout.write(query);
+  return inputLines.next().then(result => result.done ? '' : result.value.trim());
 }
 
 async function main() {
@@ -49,7 +56,7 @@ async function main() {
     const readmeContent = generateReadme(config);
 
     // Save README
-    fs.writeFileSync(path.join(process.cwd(), outputPath), readmeContent);
+    fs.writeFileSync(path.resolve(process.cwd(), outputPath), readmeContent);
 
     console.log('✅ Success! README generated at:', outputPath);
     console.log('\n📊 Generated README includes:');
