@@ -381,6 +381,31 @@ export default function ReadmeGenerator() {
             <span className="intro-pill">Download .md</span>
             <span className="intro-pill">GitHub commit</span>
           </div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              width: 'min(520px, 100%)',
+              margin: '1.25rem auto 0',
+            }}
+          >
+            <input
+              className="input"
+              readOnly
+              value={CLI_REPO_URL}
+              aria-label="CLI link"
+              style={{ minWidth: 0, flex: 1, height: '34px', fontSize: '12.5px' }}
+            />
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={copyCliLink}
+            >
+              {cliCopied ? 'Copied' : 'Copy'}
+            </button>
+          </div>
         </section>
 
         <section className="panel panel-left">
@@ -468,30 +493,6 @@ export default function ReadmeGenerator() {
         </section>
 
         <section className="panel" style={{ overflow: generatedReadme ? 'auto' : 'visible' }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              marginBottom: '1rem',
-            }}
-          >
-            <input
-              className="input"
-              readOnly
-              value={CLI_REPO_URL}
-              aria-label="CLI link"
-              style={{ minWidth: 0, flex: 1, height: '34px', fontSize: '12.5px' }}
-            />
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm"
-              onClick={copyCliLink}
-            >
-              {cliCopied ? 'Copied' : 'Copy'}
-            </button>
-          </div>
-
           <div className="section-header">
             <div className="section-title">Live Preview</div>
           </div>
