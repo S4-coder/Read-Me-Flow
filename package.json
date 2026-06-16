@@ -1,7 +1,31 @@
 {
   "name": "readmeflow",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "description": "ReadMeFlow generates professional README files from a web UI, CLI, and API.",
+  "license": "MIT",
+  "bin": {
+    "readmeflow": "bin/readme-generator.js"
+  },
+  "files": [
+    "app",
+    "bin",
+    "components",
+    "lib",
+    "LICENSE",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/S4-coder/Read-Me-Flow.git"
+  },
+  "keywords": [
+    "readme",
+    "generator",
+    "cli",
+    "github",
+    "markdown"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",

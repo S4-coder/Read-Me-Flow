@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import Header from './Header';
 import Footer from './Footer';
 
-const CLI_COMMAND = 'npm run generate-readme';
+const CLI_REPO_URL = 'https://github.com/S4-coder/Read-Me-Flow.git';
 
 function normalizeRepoInput(input) {
   if (!input) return {};
@@ -280,8 +280,8 @@ export default function ReadmeGenerator() {
     element.click();
   };
 
-  const copyCliCommand = () => {
-    navigator.clipboard.writeText(CLI_COMMAND);
+  const copyCliLink = () => {
+    navigator.clipboard.writeText(CLI_REPO_URL);
     setCliCopied(true);
     setTimeout(() => setCliCopied(false), 2000);
   };
@@ -419,36 +419,6 @@ export default function ReadmeGenerator() {
               {loading ? 'Generating...' : 'Generate README'}
             </button>
 
-            <div className="card card-elevated">
-              <div className="section-header" style={{ marginBottom: '0.75rem' }}>
-                <div className="section-title">CLI Generator</div>
-              </div>
-              <p className="text-slate-400" style={{ color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
-                Generate a README directly from your terminal with the bundled CLI.
-              </p>
-              <div
-                className="card"
-                style={{
-                  background: 'rgba(15, 23, 42, 0.28)',
-                  border: '1px solid var(--border-dim)',
-                  padding: '0.75rem 0.875rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '0.75rem',
-                }}
-              >
-                <code style={{ color: 'var(--text-primary)', overflowWrap: 'anywhere' }}>{CLI_COMMAND}</code>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm"
-                  onClick={copyCliCommand}
-                >
-                  {cliCopied ? 'Copied' : 'Copy'}
-                </button>
-              </div>
-            </div>
-
             {error ? (
               <div className="card card-elevated" style={{ background: 'rgba(248, 113, 113, 0.08)', borderColor: 'rgba(248, 113, 113, 0.18)', color: '#f87171' }}>
                 {error}
@@ -498,6 +468,30 @@ export default function ReadmeGenerator() {
         </section>
 
         <section className="panel" style={{ overflow: generatedReadme ? 'auto' : 'visible' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              marginBottom: '1rem',
+            }}
+          >
+            <input
+              className="input"
+              readOnly
+              value={CLI_REPO_URL}
+              aria-label="CLI link"
+              style={{ minWidth: 0, flex: 1, height: '34px', fontSize: '12.5px' }}
+            />
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={copyCliLink}
+            >
+              {cliCopied ? 'Copied' : 'Copy'}
+            </button>
+          </div>
+
           <div className="section-header">
             <div className="section-title">Live Preview</div>
           </div>
