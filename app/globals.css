@@ -334,7 +334,7 @@ a:hover {
 }
 
 .sidebar-toggle {
-  display: none;
+  display: none !important;
 }
 
 .sidebar-overlay {
@@ -428,7 +428,7 @@ a:hover {
   }
 
   .sidebar-toggle {
-    display: inline-flex;
+    display: inline-flex !important;
   }
 }
 
