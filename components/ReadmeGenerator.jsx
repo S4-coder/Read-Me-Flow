@@ -5,6 +5,8 @@ import ReactMarkdown from 'react-markdown';
 import Header from './Header';
 import Footer from './Footer';
 
+const CLI_COMMAND = 'npm run generate-readme';
+
 function normalizeRepoInput(input) {
   if (!input) return {};
 
@@ -48,6 +50,7 @@ export default function ReadmeGenerator() {
   const [commitStatus, setCommitStatus] = useState('');
   const [error, setError] = useState('');
   const [previewMode, setPreviewMode] = useState('raw');
+  const [cliCopied, setCliCopied] = useState(false);
   const [theme, setTheme] = useState(() => {
     if (typeof window === 'undefined') return 'dark';
     return localStorage.getItem('readmeflow-theme') || 'dark';
@@ -277,6 +280,12 @@ export default function ReadmeGenerator() {
     element.click();
   };
 
+  const copyCliCommand = () => {
+    navigator.clipboard.writeText(CLI_COMMAND);
+    setCliCopied(true);
+    setTimeout(() => setCliCopied(false), 2000);
+  };
+
   const commitReadmeToGitHub = async () => {
     if (!generatedReadme) {
       setError('Generate a README before committing.');
@@ -368,6 +377,7 @@ export default function ReadmeGenerator() {
             <span className="intro-pill">Free to use</span>
             <span className="intro-pill">Instant generation</span>
             <span className="intro-pill">Auto tech detection</span>
+            <span className="intro-pill">CLI generator</span>
             <span className="intro-pill">Download .md</span>
             <span className="intro-pill">GitHub commit</span>
           </div>
@@ -408,6 +418,36 @@ export default function ReadmeGenerator() {
             >
               {loading ? 'Generating...' : 'Generate README'}
             </button>
+
+            <div className="card card-elevated">
+              <div className="section-header" style={{ marginBottom: '0.75rem' }}>
+                <div className="section-title">CLI Generator</div>
+              </div>
+              <p className="text-slate-400" style={{ color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+                Generate a README directly from your terminal with the bundled CLI.
+              </p>
+              <div
+                className="card"
+                style={{
+                  background: 'rgba(15, 23, 42, 0.28)',
+                  border: '1px solid var(--border-dim)',
+                  padding: '0.75rem 0.875rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '0.75rem',
+                }}
+              >
+                <code style={{ color: 'var(--text-primary)', overflowWrap: 'anywhere' }}>{CLI_COMMAND}</code>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={copyCliCommand}
+                >
+                  {cliCopied ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+            </div>
 
             {error ? (
               <div className="card card-elevated" style={{ background: 'rgba(248, 113, 113, 0.08)', borderColor: 'rgba(248, 113, 113, 0.18)', color: '#f87171' }}>
