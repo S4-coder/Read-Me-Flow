@@ -407,20 +407,39 @@ a:hover {
   }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .navbar {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
+    align-items: center;
+    flex-direction: row;
+    gap: 0.5rem;
+    min-height: 58px;
+    padding: 0.55rem 1rem;
+  }
+
+  .navbar-brand {
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .brand-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
   }
 
   .navbar-actions {
-    width: 100%;
-    margin-left: 0;
+    width: auto;
+    margin-left: auto;
     justify-content: flex-end;
-    overflow-x: auto;
-    padding-bottom: 0.25rem;
+    gap: 8px;
+    overflow: visible;
+    padding: 0;
+  }
+
+  .btn-ghost.btn-sm {
+    height: 32px;
+    padding: 0 9px;
+    font-size: 12px;
   }
 
   .nav-page-links {
@@ -429,6 +448,9 @@ a:hover {
 
   .sidebar-toggle {
     display: inline-flex !important;
+    width: 34px;
+    height: 34px;
+    padding: 0;
   }
 }
 
