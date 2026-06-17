@@ -30,6 +30,19 @@ function normalizeRepoInput(input) {
   return {};
 }
 
+async function fetchGitHubRepo(owner, repo) {
+  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
+  if (!res.ok) return null;
+  return res.json();
+}
+
+async function fetchGitHubTree(owner, repo, branch) {
+  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${encodeURIComponent(branch)}?recursive=1`);
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.tree || [];
+}
+
 export async function POST(request) {
   try {
     const body = await request.json().catch(() => ({}));
@@ -43,6 +56,12 @@ export async function POST(request) {
         body.githubRepo
     );
 
+    const githubRepo = repo.owner && repo.repo ? await fetchGitHubRepo(repo.owner, repo.repo) : null;
+    const branch = body.branch || githubRepo?.default_branch || 'main';
+    const githubTree = repo.owner && repo.repo
+      ? await fetchGitHubTree(repo.owner, repo.repo, branch)
+      : null;
+
     const config = {
       projectName: body.projectName || repo.repo || 'My Project',
       description: body.description || 'Project description',
@@ -53,6 +72,9 @@ export async function POST(request) {
       projectPath: process.cwd(),
       includeFileTree: body.includeFileTree !== false,
       includeTechStack: body.includeTechStack !== false,
+      githubProjectTree: githubTree,
+      repositoryOwner: githubRepo?.owner?.login || body.author || 'Author',
+      repositoryUrl: githubRepo?.html_url || '',
     };
 
     const readme = generateReadme(config);

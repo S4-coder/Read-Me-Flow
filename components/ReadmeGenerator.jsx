@@ -31,13 +31,108 @@ function normalizeRepoInput(input) {
   return {};
 }
 
-function encodeBase64(text) {
-  const bytes = new TextEncoder().encode(text);
-  let binary = '';
-  bytes.forEach((byte) => {
-    binary += String.fromCharCode(byte);
+function encodeGitHubPath(filePath) {
+  return filePath.split('/').map(encodeURIComponent).join('/');
+}
+
+function getFileIcon(filename) {
+  const extension = filename.includes('.') ? filename.slice(filename.lastIndexOf('.')) : '';
+  const iconMap = {
+    '.js': '📄',
+    '.jsx': '⚛️',
+    '.ts': '📘',
+    '.tsx': '⚛️',
+    '.json': '⚙️',
+    '.md': '📝',
+    '.css': '🎨',
+    '.scss': '🎨',
+    '.html': '🌐',
+    '.yml': '⚙️',
+    '.yaml': '⚙️',
+    '.env': '🔐',
+    '.lock': '🔒',
+    '.gitignore': '🙈',
+  };
+
+  return iconMap[extension] || '📄';
+}
+
+function shouldIgnoreTreePath(filePath) {
+  const ignoredFolders = ['node_modules', '.git', '.next', 'dist', 'build', 'coverage'];
+  const ignoredExtensions = ['.log', '.png', '.jpg', '.jpeg', '.gif', '.webp', '.ico', '.pdf', '.zip'];
+  const parts = filePath.split('/');
+
+  return parts.some(part => ignoredFolders.includes(part)) ||
+    ignoredExtensions.some(extension => filePath.toLowerCase().endsWith(extension));
+}
+
+function createTreeNode(name) {
+  return {
+    name,
+    type: 'dir',
+    children: new Map(),
+  };
+}
+
+function addTreeEntry(root, entry) {
+  if (!entry.path || shouldIgnoreTreePath(entry.path)) return;
+
+  const parts = entry.path.split('/');
+  let currentNode = root;
+
+  parts.forEach((part, index) => {
+    if (!currentNode.children.has(part)) {
+      currentNode.children.set(part, createTreeNode(part));
+    }
+
+    currentNode = currentNode.children.get(part);
+
+    if (index === parts.length - 1 && entry.type === 'blob') {
+      currentNode.type = 'file';
+      currentNode.children.clear();
+    }
   });
-  return window.btoa(binary);
+}
+
+function renderProjectTree(node, prefix = '', isLast = true, depth = 0, maxDepth = Number.POSITIVE_INFINITY) {
+  if (depth > maxDepth) return '';
+
+  const connector = isLast ? '└── ' : '├── ';
+  const icon = node.type === 'dir' ? '📁' : getFileIcon(node.name);
+  const label = node.type === 'dir' ? `${node.name}/` : node.name;
+  let tree = `${prefix}${connector}${icon} ${label}\n`;
+
+  if (node.type === 'dir' && depth < maxDepth) {
+    const children = Array.from(node.children.values()).sort((a, b) => {
+      if (a.type !== b.type) return a.type === 'dir' ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+    const childPrefix = prefix + (isLast ? '    ' : '│   ');
+
+    children.forEach((child, index) => {
+      tree += renderProjectTree(child, childPrefix, index === children.length - 1, depth + 1, maxDepth);
+    });
+  }
+
+  return tree;
+}
+
+async function fetchGitHubProjectTree(owner, repo, branch) {
+  const treeRes = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/git/trees/${encodeURIComponent(branch)}?recursive=1`
+  );
+
+  if (!treeRes.ok) {
+    const text = await treeRes.text();
+    throw new Error(`Could not fetch project structure: ${parseGitHubError(text, treeRes.statusText)}`);
+  }
+
+  const data = await treeRes.json();
+  const root = createTreeNode(repo);
+
+  (data.tree || []).forEach(entry => addTreeEntry(root, entry));
+
+  return renderProjectTree(root, '', true, 0);
 }
 
 export default function ReadmeGenerator() {
@@ -99,6 +194,14 @@ export default function ReadmeGenerator() {
       if (!repoRes.ok) throw new Error('Repository not found');
 
       const repoData = await repoRes.json();
+      const branch = repoData.default_branch || 'main';
+      let projectStructure = '';
+
+      try {
+        projectStructure = await fetchGitHubProjectTree(owner, repo, branch);
+      } catch (err) {
+        console.log(err.message);
+      }
 
       let techs = [];
       let topics = repoData.topics || [];
@@ -166,9 +269,11 @@ export default function ReadmeGenerator() {
         language: repoData.language,
         topics: topics,
         techs: allTechs,
+        defaultBranch: branch,
+        projectStructure,
       });
 
-      generateReadme(repoData, allTechs, topics);
+      generateReadme(repoData, allTechs, topics, projectStructure);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -176,7 +281,7 @@ export default function ReadmeGenerator() {
     }
   };
 
-  const generateReadme = (repoData, techs, topics) => {
+  const generateReadme = (repoData, techs, topics, projectStructure) => {
     const lang = repoData.language || 'JavaScript';
     const isReact = techs.some(t => ['React', 'Next.js', 'Vue', 'Angular'].includes(t));
     const isBackend = techs.some(t => ['Express', 'Django', 'Node.js', 'Flask', 'Spring'].includes(t));
@@ -223,9 +328,22 @@ export default function ReadmeGenerator() {
     markdown += `- 🔒 **Security** - Best practices for secure development\n`;
     markdown += `- 📱 **Mobile-Friendly** - Fully responsive across all device sizes\n\n`;
 
-    markdown += `## 📦 Installation\n\n\`\`\`bash\ngit clone ${repoData.html_url}.git\ncd ${repoData.name}\nnpm install\`\`\`\n\n`;
-
-    markdown += `## 🚀 Usage\n\n\`\`\`bash\nnpm run dev\n\`\`\`\n\n`;
+    markdown += `## 📦 Installation\n\n`;
+    markdown += `### Clone the repository\n\n`;
+    markdown += `\`\`\`bash\ngit clone ${repoData.html_url}.git\ncd ${repoData.name}\n\`\`\`\n\n`;
+    markdown += `### Install dependencies\n\n`;
+    markdown += `\`\`\`bash\nnpm install\n\`\`\`\n\n`;
+    markdown += `## 🚀 Usage\n\n`;
+    markdown += `### Run the development server\n\n`;
+    markdown += `\`\`\`bash\nnpm run dev\n\`\`\`\n\n`;
+    markdown += `Open [http://localhost:3000](http://localhost:3000) in your browser.\n\n`;
+    markdown += `### Generate a README\n\n`;
+    markdown += `1. Enter a GitHub repository as \`owner/repo\` or a full GitHub URL.\n`;
+    markdown += `2. Click **Generate README**.\n`;
+    markdown += `3. Review the live preview.\n`;
+    markdown += `4. Use **Copy**, **Download**, or **Commit on GitHub**.\n\n`;
+    markdown += `### Build and run production\n\n`;
+    markdown += `\`\`\`bash\nnpm run build\nnpm start\n\`\`\`\n\n`;
 
     markdown += `## 🧪 Testing\n\n\`\`\`bash\nnpm test\n\`\`\`\n\n`;
 
@@ -254,7 +372,7 @@ export default function ReadmeGenerator() {
     markdown += `Absolutely. ReadmeFlow only accesses public repository data through the GitHub API. No sensitive data is stored or transmitted.\n\n`;
     markdown += `</details>\n\n`;
 
-    markdown += `## 📁 Project Structure\n\n\`\`\`text\n${repoData.name}/\n├── 📁 src/\n│   ├── 📁 components/\n│   ├── 📁 pages/\n│   └── 📄 index.js\n├── 📄 package.json\n├── 📄 README.md\n└── 📄 .env.example\n\`\`\`\n\n`;
+    markdown += `## 📁 Project Structure\n\n\`\`\`text\n${projectStructure || 'Project structure could not be fetched from GitHub.'}\n\`\`\`\n\n`;
 
     markdown += `## 📄 License\n\nDistributed under the MIT License. See \`LICENSE\` for more information.\n\n`;
 
@@ -288,7 +406,7 @@ export default function ReadmeGenerator() {
 
   const commitReadmeToGitHub = async () => {
     if (!generatedReadme) {
-      setError('Generate a README before committing.');
+      setError('Generate a README before opening GitHub.');
       return;
     }
 
@@ -298,69 +416,27 @@ export default function ReadmeGenerator() {
       return;
     }
 
-    const token = window.prompt('Enter your GitHub personal access token with repo/file write permission:');
-    if (!token) return;
-
-    const branch = window.prompt('Enter branch name:', 'main') || 'main';
-    const filePath = window.prompt('Enter README file path:', 'README.md') || 'README.md';
-    const message = window.prompt('Enter commit message:', 'Update README with ReadmeFlow') || 'Update README with ReadmeFlow';
+    const branch = projectData?.defaultBranch || 'main';
+    const filePath = 'README.md';
+    const githubUrl = `https://github.com/${repo.owner}/${repo.repo}/edit/${encodeURIComponent(branch)}/${encodeGitHubPath(filePath)}?value=${encodeURIComponent(generatedReadme)}`;
 
     setCommitting(true);
     setCommitStatus('');
     setError('');
 
+    const githubWindow = window.open(githubUrl, '_blank', 'noopener,noreferrer');
+
     try {
-      const apiHeaders = {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-      };
-
-      const existingFileRes = await fetch(
-        `https://api.github.com/repos/${repo.owner}/${repo.repo}/contents/${encodeURIComponent(filePath)}`,
-        { headers: apiHeaders }
-      );
-
-      let existingSha;
-      if (existingFileRes.ok) {
-        const existingFile = await existingFileRes.json();
-        existingSha = existingFile.sha;
-      } else if (existingFileRes.status !== 404) {
-        throw new Error('Could not check existing README file.');
-      }
-
-      const commitBody = {
-        message,
-        branch,
-        content: encodeBase64(generatedReadme),
-      };
-
-      if (existingSha) {
-        commitBody.sha = existingSha;
-      }
-
-      const commitRes = await fetch(
-        `https://api.github.com/repos/${repo.owner}/${repo.repo}/contents/${encodeURIComponent(filePath)}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            ...apiHeaders,
-          },
-          body: JSON.stringify(commitBody),
-        }
-      );
-
-      const commitData = await commitRes.json();
-      if (!commitRes.ok) {
-        throw new Error(commitData.message || 'Failed to commit README.');
-      }
-
-      setCommitStatus(`README committed to ${repo.owner}/${repo.repo} on ${branch}.`);
+      await navigator.clipboard.writeText(generatedReadme);
+      setCommitStatus('GitHub commit page opened with README content prefilled. Click Commit changes on GitHub.');
     } catch (err) {
-      setError(err.message);
+      setCommitStatus('GitHub commit page opened. Content is prefilled; if needed, copy from preview and paste it on GitHub.');
     } finally {
       setCommitting(false);
+    }
+
+    if (!githubWindow) {
+      setCommitStatus('GitHub commit page could not open automatically. Allow popups and click the button again.');
     }
   };
 
@@ -533,7 +609,7 @@ export default function ReadmeGenerator() {
                     onClick={commitReadmeToGitHub}
                     disabled={!generatedReadme || committing}
                   >
-                    {committing ? 'Committing...' : 'Commit to GitHub'}
+                    {committing ? 'Opening...' : 'Commit on GitHub'}
                   </button>
                 </div>
               </div>

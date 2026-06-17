@@ -2,12 +2,63 @@ import { NextResponse } from 'next/server';
 import { generateReadme, detectTechStack, generateFileTree } from '@/lib/readmeGenerator';
 import path from 'path';
 
+async function fetchGitHubRepo(owner, repo) {
+  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
+  if (!res.ok) return null;
+  return res.json();
+}
+
+async function fetchGitHubTree(owner, repo, branch) {
+  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${encodeURIComponent(branch)}?recursive=1`);
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.tree || [];
+}
+
+function normalizeRepoInput(input) {
+  if (!input) return {};
+
+  const value = String(input).trim();
+  const match = value.match(/github\.com\/([^/]+)\/([^/?#]+)/);
+
+  if (match) {
+    return {
+      owner: match[1],
+      repo: match[2].replace(/\.git$/, ''),
+    };
+  }
+
+  const parts = value.split('/').filter(Boolean);
+  if (parts.length === 2) {
+    return {
+      owner: parts[0],
+      repo: parts[1].replace(/\.git$/, ''),
+    };
+  }
+
+  return {};
+}
+
 export async function POST(request) {
   try {
     const body = await request.json();
+    const repo = normalizeRepoInput(
+      body.repo ||
+        body.repository ||
+        body.repositoryUrl ||
+        body.repoUrl ||
+        body.url ||
+        body.searchQuery ||
+        body.githubRepo
+    );
+    const githubRepo = repo.owner && repo.repo ? await fetchGitHubRepo(repo.owner, repo.repo) : null;
+    const branch = body.branch || githubRepo?.default_branch || 'main';
+    const githubTree = repo.owner && repo.repo
+      ? await fetchGitHubTree(repo.owner, repo.repo, branch)
+      : null;
 
     const config = {
-      projectName: body.projectName || 'My Project',
+      projectName: body.projectName || repo.repo || 'My Project',
       description: body.description || 'Project description',
       author: body.author || 'Author',
       license: body.license || 'MIT',
@@ -16,6 +67,9 @@ export async function POST(request) {
       projectPath: process.cwd(),
       includeFileTree: body.includeFileTree !== false,
       includeTechStack: body.includeTechStack !== false,
+      githubProjectTree: githubTree,
+      repositoryOwner: githubRepo?.owner?.login || body.author || 'Author',
+      repositoryUrl: githubRepo?.html_url || '',
     };
 
     const readme = generateReadme(config);
