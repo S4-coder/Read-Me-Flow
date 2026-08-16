@@ -1,5 +1,6 @@
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import Link from 'next/link';
 
 export const metadata = {
   title: 'Features',
@@ -31,6 +32,11 @@ const features = [
     title: 'CLI and API Generator',
     description: 'Generate README files from the command line or through the Next.js API route for automation.',
   },
+  {
+    title: 'Interactive Badge & Icon Generator',
+    description: 'Pick languages, frameworks, databases, and social badges to instantly build and copy custom GitHub README markdown blocks.',
+    href: '/features/badges',
+  },
 ];
 
 export default function FeaturesPage() {
@@ -48,13 +54,17 @@ export default function FeaturesPage() {
         <section className="panel" style={{ padding: 0, overflow: 'visible' }}>
           <div className="content-grid">
             {features.map((feature) => (
-              <article
-                key={feature.title}
-                className="feature-card"
-              >
-                <h2 className="feature-card-title">{feature.title}</h2>
-                <p className="feature-card-description">{feature.description}</p>
-              </article>
+              feature.href ? (
+                <Link href={feature.href} key={feature.title} className="feature-card" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                  <h2 className="feature-card-title">{feature.title}</h2>
+                  <p className="feature-card-description">{feature.description}</p>
+                </Link>
+              ) : (
+                <article key={feature.title} className="feature-card">
+                  <h2 className="feature-card-title">{feature.title}</h2>
+                  <p className="feature-card-description">{feature.description}</p>
+                </article>
+              )
             ))}
           </div>
         </section>

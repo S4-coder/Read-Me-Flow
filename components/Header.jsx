@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 const pages = [
   { href: '/', label: 'Home' },
   { href: '/features', label: 'Features' },
+  { href: '/features/badges', label: 'Badges' },
   { href: '/privacy', label: 'Privacy' },
 ];
 
@@ -19,6 +20,11 @@ export default function Header() {
     return localStorage.getItem('readmeflow-theme') || 'dark';
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -42,6 +48,15 @@ export default function Header() {
     document.documentElement.setAttribute('data-theme', next);
   };
 
+  const themeLabel = mounted
+    ? theme === 'dark'
+      ? '☀️ Light'
+      : '🌙 Dark'
+    : '☀️ Light';
+  const themeTitle = mounted
+    ? `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`
+    : 'Switch to light mode';
+
   return (
     <>
       <header className="navbar">
@@ -54,9 +69,9 @@ export default function Header() {
             type="button"
             className="btn btn-ghost btn-sm"
             onClick={toggleTheme}
-            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            title={themeTitle}
           >
-            {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+            {themeLabel}
           </button>
           <div className="nav-page-links">
             {pages.map((page) => (

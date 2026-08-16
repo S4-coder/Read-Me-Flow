@@ -382,6 +382,8 @@ export default function ReadmeGenerator() {
 
     markdown += `---\n⭐ Star this repo if you found it helpful!\n`;
 
+    markdown += `\n> 💡 *Note: This repository's README documentation and flow structure have been generated using [read-me-flow.vercel.app](https://read-me-flow.vercel.app).*\n`;
+
     setGeneratedReadme(markdown);
   };
 
