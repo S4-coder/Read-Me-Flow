@@ -299,7 +299,7 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
 }
 
@@ -328,6 +328,8 @@ a:hover {
   color: var(--text-primary);
   font-size: 12.5px;
   font-weight: 500;
+  min-width: 140px;
+  max-width: 220px;
   width: 180px;
   outline: none;
   transition: all var(--transition);
@@ -342,6 +344,7 @@ a:hover {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
   width: 220px;
+  max-width: 220px;
 }
 
 .nav-search-dropdown {
@@ -501,9 +504,10 @@ a:hover {
     width: auto;
     margin-left: auto;
     justify-content: flex-end;
-    gap: 8px;
+    gap: 6px;
     overflow: visible;
     padding: 0;
+    flex-wrap: nowrap;
   }
 
   .btn-ghost.btn-sm {
@@ -514,6 +518,20 @@ a:hover {
 
   .nav-page-links {
     display: none;
+  }
+
+  .nav-search {
+    flex-shrink: 0;
+  }
+
+  .nav-search-input {
+    width: 140px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .nav-search-input:focus {
+    width: 160px;
   }
 
   .sidebar-toggle {
