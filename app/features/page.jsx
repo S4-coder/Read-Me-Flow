@@ -1,6 +1,5 @@
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import Link from 'next/link';
 
 export const metadata = {
   title: 'Features',
@@ -29,13 +28,12 @@ const features = [
     description: 'Commit the generated README directly to the connected GitHub repository from the preview actions.',
   },
   {
-    title: 'CLI and API Generator',
-    description: 'Generate README files from the command line or through the Next.js API route for automation.',
+    title: 'Badges & Banners Generator',
+    description: 'Auto generate custom badges, icons, and header banners with gradients and fonts for your README.',
   },
   {
-    title: 'Interactive Badge & Icon Generator',
-    description: 'Pick languages, frameworks, databases, and social badges to instantly build and copy custom GitHub README markdown blocks.',
-    href: '/features/badges',
+    title: 'GitHub Stats Generator',
+    description: 'Generate GitHub stats cards, top languages, streak stats, profile trophies, and visitor count badges.',
   },
 ];
 
@@ -54,17 +52,10 @@ export default function FeaturesPage() {
         <section className="panel" style={{ padding: 0, overflow: 'visible' }}>
           <div className="content-grid">
             {features.map((feature) => (
-              feature.href ? (
-                <Link href={feature.href} key={feature.title} className="feature-card" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-                  <h2 className="feature-card-title">{feature.title}</h2>
-                  <p className="feature-card-description">{feature.description}</p>
-                </Link>
-              ) : (
-                <article key={feature.title} className="feature-card">
-                  <h2 className="feature-card-title">{feature.title}</h2>
-                  <p className="feature-card-description">{feature.description}</p>
-                </article>
-              )
+              <article key={feature.title} className="feature-card">
+                <h2 className="feature-card-title">{feature.title}</h2>
+                <p className="feature-card-description">{feature.description}</p>
+              </article>
             ))}
           </div>
         </section>

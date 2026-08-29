@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 import Header from './Header';
 import Footer from './Footer';
-
-const CLI_REPO_URL = 'https://github.com/S4-coder/Read-Me-Flow.git';
 
 function normalizeRepoInput(input) {
   if (!input) return {};
@@ -135,6 +134,415 @@ async function fetchGitHubProjectTree(owner, repo, branch) {
   return renderProjectTree(root, '', true, 0);
 }
 
+function techBadges(techs) {
+  if (!techs || techs.length === 0) return '';
+  return techs.map(tech => '**' + tech + '**').join('<br>');
+}
+
+function starsBadge(user, repo) {
+  return '';
+}
+
+function forksBadge(user, repo) {
+  return '';
+}
+
+function langBadge(user, repo) {
+  return '';
+}
+
+function licenseBadge(user, repo) {
+  return '';
+}
+
+function topicBadges(topics) {
+  if (!topics || topics.length === 0) return '';
+  return topics.map(t => '**' + t + '**').join(', ');
+}
+
+function projectTypeFromTechs(techs, language) {
+  const t = Array.isArray(techs) ? techs : [];
+  const hasFrontend = t.some(x => ['React', 'Next.js', 'Vue', 'Angular', 'Svelte'].includes(x));
+  const hasBackend = t.some(x => ['Express', 'Django', 'Node.js', 'Flask', 'Spring', 'FastAPI', 'Laravel'].includes(x));
+  const hasMobile = t.some(x => ['React Native', 'Flutter', 'Swift', 'Kotlin'].includes(x));
+  const hasData = t.some(x => ['TensorFlow', 'PyTorch', 'Pandas', 'NumPy'].includes(x));
+  const hasDevOps = t.some(x => ['Docker', 'Kubernetes', 'AWS', 'Azure', 'GCP', 'Terraform'].includes(x));
+  
+  if (hasFrontend && hasBackend) return 'fullstack';
+  if (hasMobile) return 'mobile';
+  if (hasData) return 'data';
+  if (hasDevOps) return 'devops';
+  if (hasBackend) return 'backend';
+  if (hasFrontend) return 'frontend';
+  if (language) {
+    const l = language.toLowerCase();
+    if (['python', 'jupyter notebook'].includes(l)) return 'python';
+    if (['javascript', 'typescript'].includes(l)) return 'javascript';
+  }
+  return 'generic';
+}
+
+const readmeTemplates = [
+  {
+    id: 1,
+    name: "🚀 Full-Stack Web App (Heavy & Detailed)",
+    generate: (data) => {
+      const type = projectTypeFromTechs(data.techs, data.language);
+      const techs = data.techs || [];
+      const topics = topicBadges(data.topics);
+      const techBadgeStr = techBadges(techs);
+      
+      let features = '';
+      if (type === 'fullstack') {
+        features = `- 🔐 **Secure Authentication:** JWT-based secure auth with role-based access control.
+- ⚡ **High Performance:** Optimized database queries and response caching layers.
+- 📱 **Responsive Design:** Fluid layout across mobile, tablet, and desktop screens.
+- 🔌 **RESTful API Architecture:** Clean, well-documented endpoints for third-party integrations.
+- 🎨 **Modern UI/UX:** Polished interface with smooth transitions and accessibility best practices.
+- 🧪 **Comprehensive Testing:** Unit, integration, and E2E tests with CI/CD pipeline.`;
+      } else if (type === 'mobile') {
+        features = `- 📱 **Cross-Platform Support:** iOS and Android from a single codebase.
+- ⚡ **Optimized Performance:** Smooth animations and lazy loading for better UX.
+- 🔔 **Push Notifications:** Real-time alerts and messaging integration.
+- 📍 **Location Services:** GPS tracking and maps integration.
+- 🔐 **Secure Storage:** Encrypted local data and secure API communication.`;
+      } else if (type === 'backend') {
+        features = `- 🔌 **RESTful API:** Well-structured endpoints with OpenAPI documentation.
+- 🔐 **Authentication & Authorization:** JWT, OAuth2, and role-based access control.
+- 📊 **Database Optimization:** Indexed queries, connection pooling, and caching.
+- 🚀 **High Availability:** Load balancing and horizontal scaling support.
+- 📈 **Monitoring & Logging:** Structured logs, metrics, and health checks.`;
+      } else if (type === 'python') {
+        features = `- 🧮 **Data Processing:** Efficient data manipulation and analysis pipelines.
+- 🤖 **Automation:** Scripts and tools for repetitive task automation.
+- 📦 **Package Management:** Proper packaging with setup.py/pyproject.toml.
+- 🧪 **Testing:** pytest suites with coverage reporting.
+- 📚 **Documentation:** Auto-generated docs with type hints and docstrings.`;
+      } else {
+        features = `- ⚡ **High Performance:** Optimized algorithms and efficient resource usage.
+- 📦 **Modular Architecture:** Clean separation of concerns and reusable components.
+- 🧪 **Well Tested:** Comprehensive test coverage with CI/CD integration.
+- 📚 **Documentation:** Detailed guides, API references, and examples.
+- 🤝 **Community Driven:** Open for contributions and follows best practices.`;
+      }
+
+      const techStackSection = techBadgeStr ? `<p>${techBadgeStr}</p>` : '';
+      const topicsSection = topics ? `\n🏷️ **Topics:** ${topics}\n` : '';
+      const structureSection = data.projectStructure ? `## 📁 Project Structure\n\n\`\`\`text\n${data.projectStructure}\n\`\`\`\n\n` : '';
+
+      return `<h1 align="center">${data.projectName || 'Project'}</h1>
+<p align="center"><b>${data.description || 'A comprehensive, production-ready project built with modern best practices and scalable architecture.'}</b></p>
+
+---
+
+## 📌 About The Project
+${data.description || 'A comprehensive, production-ready project built with modern best practices and scalable architecture.'}
+
+${topicsSection}
+
+## ✨ Key Features
+${features}
+
+## 🛠️ Built With & Tech Stack
+${techStackSection}
+
+---
+
+## ⚙️ Environment Variables Setup
+Create a \`.env\` file in the root directory and add the following keys:
+\`\`\`env
+NODE_ENV=development
+API_URL=http://localhost:3000/api
+DATABASE_URL=your_database_connection_string
+\`\`\`
+
+## 🚀 Installation & Local Running
+\`\`\`bash
+# 1. Clone the repository
+git clone ${data.repoUrl || 'https://github.com/username/repo.git'}
+
+# 2. Navigate to project directory
+cd ${data.repoName || 'repo'}
+
+# 3. Install dependencies
+npm install
+
+# 4. Run the development server
+npm run dev
+\`\`\`
+
+${structureSection}
+
+## 🚀 Deployment
+Deploy easily to **Vercel**, **Netlify**, **AWS**, or any cloud platform of your choice.
+
+## 🤝 Contributing
+Contributions are always welcome! Please read the contributing guidelines first.
+
+## 📄 License
+Distributed under the MIT License. See \`LICENSE\` for more information.
+
+## 👤 Author
+**${data.githubUser || 'username'}** - [@${data.githubUser || 'username'}](${data.repoUrl ? data.repoUrl.replace('https://github.com', 'https://github.com') : 'https://github.com'})
+
+## 📞 Support
+For support, open an issue on GitHub or reach out via email.
+
+---
+⭐ Star this repo if you found it helpful!
+
+<div align="center">
+  <sub>Generated with <a href="https://read-me-flow.vercel.app">ReadmeFlow</a></sub>
+</div>`;
+    }
+  },
+  {
+    id: 2,
+    name: "🏢 Professional Corporate & API Backend",
+    generate: (data) => {
+      const techs = data.techs || [];
+      const techBadgeStr = techBadges(techs);
+      
+      return `<h1 align="center">${data.projectName || 'Enterprise Microservice'}</h1>
+<p align="center"><b>${data.description || 'High-performance backend API service designed for secure data processing and scalable architecture.'}</b></p>
+
+---
+
+## 📋 System Architecture
+This microservice follows a clean **N-Tier architecture** separating controllers, business logic services, and data persistence layers. Designed for scalability, maintainability, and high availability.
+
+## 🛠️ Technology Stack
+${techBadgeStr ? '<p>' + techBadgeStr + '</p>' : ''}
+
+## 📊 Performance Metrics
+- **Uptime:** 99.9% SLA
+- **Response Time:** < 100ms average
+- **Throughput:** 10,000+ requests/second
+- **Database:** Optimized queries with connection pooling
+
+## ⚙️ Configuration
+\`\`\`ini
+APP_ENV=production
+DB_HOST=localhost
+DB_PORT=5432
+CACHE_TTL=3600
+RATE_LIMIT=1000
+\`\`\`
+
+## 🚀 Quick Start
+\`\`\`bash
+git clone ${data.repoUrl || 'https://github.com/username/repo.git'}
+cd ${data.repoName || 'repo'}
+docker-compose up --build -d
+\`\`\`
+
+## 📌 API Documentation
+- \`GET /health\` - System health and uptime status check
+- \`POST /api/v1/data/ingest\` - Secure data ingestion endpoint
+- \`GET /api/v1/reports/export\` - Generate and stream CSV/PDF reports
+- \`GET /api/v1/metrics\` - Real-time system metrics and analytics
+
+## 🧪 Testing
+\`\`\`bash
+# Run unit tests
+npm test
+
+# Run integration tests
+npm run test:integration
+
+# Load testing
+npm run test:load
+\`\`\`
+
+## 📄 License
+Distributed under the MIT License. See \`LICENSE\` for more information.
+
+---
+⭐ Star this repo if you found it helpful!
+`;
+    }
+  },
+  {
+    id: 3,
+    name: "⚡ Cyberpunk CLI & Developer Tool",
+    generate: (data) => {
+      const projectName = data.projectName || 'Dev-Toolkit';
+      const description = data.description || 'Advanced CLI automation suite built for rapid software compilation.';
+      const repoUrl = data.repoUrl || 'https://github.com/username/repo.git';
+      const repoName = data.repoName || 'repo';
+      const stars = starsBadge(data.githubUser, data.repoName);
+      const techBadgeStr = techBadges(data.techs || []);
+
+      return [
+        '> `[SYSTEM CORE]: Initializing ' + projectName + ' repository.`',
+        '> `' + description + '`',
+        '',
+        '---',
+        '',
+        '## ⚙️ Setup & Execution',
+        '```bash',
+        '# Clone and execute package',
+        '$ git clone ' + repoUrl,
+        '$ cd ' + repoName,
+        '$ npm install -g .',
+        '```',
+        '',
+        '## 📦 Dependencies & Modules',
+        techBadgeStr ? '<p>' + techBadgeStr + '</p>' : '',
+        '',
+        '## 📂 Architecture',
+        '```text',
+        'src/',
+        '├── bin/          # CLI executable entry point',
+        '├── commands/     # Individual command modules',
+        '├── utils/        # Logger, crypto, and helpers',
+        '├── config.ts     # Global configuration schemas',
+        '└── types/        # TypeScript type definitions',
+        '```',
+        '',
+        '## 📊 Performance & Testing',
+        '```bash',
+        '# Run test suites with coverage',
+        'npm test -- --coverage',
+        '',
+        '# Build production bundle',
+        'npm run build',
+        '',
+        '# Benchmark performance',
+        'npm run benchmark',
+        '```',
+        '',
+        '## 🔧 Configuration',
+        '```json',
+        '{',
+        '  "verbose": false,',
+        '  "outputFormat": "json",',
+        '  "parallelWorkers": 4,',
+        '  "cacheEnabled": true',
+        '}',
+        '```',
+        '',
+        '## 📄 License',
+        'Distributed under the MIT License. See `LICENSE` for more information.',
+        '',
+        stars,
+        '',
+        '---',
+        '⭐ Star this repo if you found it helpful!'
+      ].join('\n');
+    }
+  },
+  {
+    id: 4,
+    name: "🌐 Open-Source Library & Package",
+    generate: (data) => {
+      const techs = data.techs || [];
+      const techBadgeStr = techBadges(techs);
+      const techStackSection = techBadgeStr ? `<p>${techBadgeStr}</p>` : '';
+      
+      return `# 📦 ${data.projectName || 'OpenSource Library'}
+
+> ${data.description || 'A lightweight, high-performance package designed to simplify complex workflows and boost developer productivity.'}
+
+---
+
+## 📥 Installation
+Install the package via your favorite package manager:
+\`\`\`bash
+npm install ${data.repoName || 'package-name'}
+# or
+yarn add ${data.repoName || 'package-name'}
+# or
+pnpm add ${data.repoName || 'package-name'}
+\`\`\`
+
+## 🚀 Quick Start
+\`\`\`javascript
+import { initializeModule } from '${data.repoName || 'package-name'}';
+
+const app = initializeModule({
+  apiKey: 'YOUR_API_KEY',
+  debugMode: false
+});
+
+app.run();
+\`\`\`
+
+## ✨ Features
+- 🎯 **Simple API:** Intuitive and easy-to-use interface
+- ⚡ **Lightweight:** Minimal bundle size with zero dependencies
+- 🔒 **Type Safe:** Full TypeScript support with comprehensive types
+- 🧪 **Well Tested:** 100% test coverage with edge cases
+- 📚 **Documented:** Detailed guides and API references
+
+## 🛠️ Tech Stack
+${techStackSection}
+
+## 🤝 Contributing
+Contributions, issues, and feature requests are welcome!
+
+## 📄 License
+Distributed under the MIT License. See \`LICENSE\` for more information.
+
+---
+⭐ Star this repo if you found it helpful!
+`;
+    }
+  },
+  {
+    id: 5,
+    name: "📊 Portfolio & Analytics Heavy Hub",
+    generate: (data) => {
+      const techs = data.techs || [];
+      const techBadgeStr = techBadges(techs);
+      const topics = topicBadges(data.topics);
+      const techStackSection = techBadgeStr ? `<p align="center">${techBadgeStr}</p>` : '';
+      
+      return `# 🔥 ${data.projectName || 'Developer Portfolio Hub'}
+
+<div align="center">
+  <img src="https://komarev.com/ghpvc/?username=${data.githubUser || 'username'}&color=blueviolet&style=flat-square" alt="Profile Views" />
+</div>
+
+> ${data.description || 'A centralized workspace repository showcasing tools, scripts, and production builds.'}
+
+${topics ? `\n🏷️ **Topics:** ${topics}\n` : ''}
+
+---
+
+## 💻 Core Skills
+${techStackSection}
+
+## 📈 GitHub Metrics
+<div align="center">
+  <img src="https://github-readme-stats.vercel.app/api?username=${data.githubUser || 'username'}&show_icons=true&theme=radical&hide_border=true" width="48%" />
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=${data.githubUser || 'username'}&layout=compact&theme=radical&hide_border=true" width="48%" />
+</div>
+
+---
+
+## 📁 Featured Projects
+This repository serves as a hub for various tools and scripts. Check out the individual directories for more details.
+
+## ⚙️ Environment Setup
+\`\`\`env
+NODE_ENV=development
+ANALYTICS_ENABLED=true
+\`\`\`
+
+## 🤝 Contribution Guidelines
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## 📄 License
+Distributed under the MIT License. See \`LICENSE\` for more information.
+
+---
+⭐ Star this repo if you found it helpful!
+`;
+    }
+  }
+];
+
 export default function ReadmeGenerator() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
@@ -145,7 +553,7 @@ export default function ReadmeGenerator() {
   const [commitStatus, setCommitStatus] = useState('');
   const [error, setError] = useState('');
   const [previewMode, setPreviewMode] = useState('raw');
-  const [cliCopied, setCliCopied] = useState(false);
+  const [templateIndex, setTemplateIndex] = useState(() => Math.floor(Math.random() * readmeTemplates.length));
   const [theme, setTheme] = useState(() => {
     if (typeof window === 'undefined') return 'dark';
     return localStorage.getItem('readmeflow-theme') || 'dark';
@@ -265,6 +673,7 @@ export default function ReadmeGenerator() {
         description: repoData.description || 'A comprehensive open-source project built for modern development.',
         owner: repoData.owner.login,
         url: repoData.html_url,
+        homepage: repoData.homepage,
         stars: repoData.stargazers_count,
         language: repoData.language,
         topics: topics,
@@ -281,109 +690,46 @@ export default function ReadmeGenerator() {
     }
   };
 
+  const switchTemplate = () => {
+    setTemplateIndex((prev) => {
+      const next = (prev + 1) % readmeTemplates.length;
+      if (projectData) {
+        const template = readmeTemplates[next];
+        const data = {
+          projectName: projectData.name,
+          description: projectData.description,
+          githubUser: projectData.owner,
+          repoName: projectData.name,
+          repoUrl: projectData.url,
+          liveUrl: projectData.homepage || projectData.url,
+          language: projectData.language,
+          techs: projectData.techs,
+          topics: projectData.topics,
+          projectStructure: projectData.projectStructure,
+        };
+        const markdown = template.generate(data);
+        setGeneratedReadme(markdown);
+      }
+      return next;
+    });
+  };
+
   const generateReadme = (repoData, techs, topics, projectStructure) => {
-    const lang = repoData.language || 'JavaScript';
-    const isReact = techs.some(t => ['React', 'Next.js', 'Vue', 'Angular'].includes(t));
-    const isBackend = techs.some(t => ['Express', 'Django', 'Node.js', 'Flask', 'Spring'].includes(t));
-    const isFullstack = isReact && isBackend;
+    const template = readmeTemplates[templateIndex];
+    const data = {
+      projectName: repoData.name,
+      description: repoData.description || 'A comprehensive open-source project built for modern development.',
+      githubUser: repoData.owner.login,
+      repoName: repoData.name,
+      repoUrl: repoData.html_url,
+      liveUrl: repoData.homepage,
+      language: repoData.language,
+      techs,
+      topics,
+      projectStructure,
+    };
 
-    let intro = '';
-    if (isFullstack) {
-      intro = `**${repoData.name}** is a modern **full-stack** application built with ${techs.slice(0, 3).join(', ')}. It provides a robust foundation for scalable web solutions with clean architecture, comprehensive tooling, and production-ready deployment configurations.`;
-    } else if (isReact) {
-      intro = `**${repoData.name}** is a modern **frontend** application crafted with ${techs.slice(0, 3).join(', ')}. It delivers a seamless user experience with reactive components, state-of-the-art styling, and optimized performance for modern browsers.`;
-    } else if (isBackend) {
-      intro = `**${repoData.name}** is a powerful **backend** service built with ${techs.slice(0, 3).join(', ')}. It provides reliable APIs, efficient data processing, and scalable architecture designed for high-traffic production environments.`;
-    } else {
-      intro = repoData.description
-        ? repoData.description
-        : `**${repoData.name}** is a ${lang.toLowerCase()} project that demonstrates modern development practices and clean code architecture. Built with ${techs.slice(0, 3).join(', ') || lang}, it focuses on performance, maintainability, and developer experience.`;
-    }
-
-    let markdown = `# 🚀 ${repoData.name}\n\n`;
-    markdown += `${intro}\n\n`;
-
-    markdown += `![Stars](https://img.shields.io/github/stars/${repoData.owner.login}/${repoData.name}?style=flat-square) `;
-    markdown += `![Forks](https://img.shields.io/github/forks/${repoData.owner.login}/${repoData.name}?style=flat-square) `;
-    markdown += `![License](https://img.shields.io/github/license/${repoData.owner.login}/${repoData.name}) `;
-    markdown += `![Language](https://img.shields.io/github/languages/top/${repoData.owner.login}/${repoData.name})\n\n`;
-
-    if (topics.length > 0) {
-      markdown += `🏷️ **Topics:** ${topics.map(t => `\`${t}\``).join(' • ')}\n\n`;
-    }
-
-    if (techs.length > 0) {
-      markdown += `## 🛠️ Tech Stack\n\n`;
-      techs.forEach((tech) => {
-        markdown += `![${tech}](https://img.shields.io/badge/${tech}-000000?style=for-the-badge&logo=${tech.toLowerCase()}&logoColor=white) `;
-      });
-      markdown += '\n\n';
-    }
-
-    markdown += `## ✨ Key Features\n\n`;
-    markdown += `- 🚀 **Production-Ready** - Optimized build process and deployment configurations\n`;
-    markdown += `- 📁 **Structured Architecture** - Well-organized folder structure for scalability\n`;
-    markdown += `- 🎨 **Modern UI** - Responsive design with smooth interactions\n`;
-    markdown += `- ⚡ **Performance** - Optimized assets and lazy loading\n`;
-    markdown += `- 🔒 **Security** - Best practices for secure development\n`;
-    markdown += `- 📱 **Mobile-Friendly** - Fully responsive across all device sizes\n\n`;
-
-    markdown += `## 📦 Installation\n\n`;
-    markdown += `### Clone the repository\n\n`;
-    markdown += `\`\`\`bash\ngit clone ${repoData.html_url}.git\ncd ${repoData.name}\n\`\`\`\n\n`;
-    markdown += `### Install dependencies\n\n`;
-    markdown += `\`\`\`bash\nnpm install\n\`\`\`\n\n`;
-    markdown += `## 🚀 Usage\n\n`;
-    markdown += `### Run the development server\n\n`;
-    markdown += `\`\`\`bash\nnpm run dev\n\`\`\`\n\n`;
-    markdown += `Open [http://localhost:3000](http://localhost:3000) in your browser.\n\n`;
-    markdown += `### Generate a README\n\n`;
-    markdown += `1. Enter a GitHub repository as \`owner/repo\` or a full GitHub URL.\n`;
-    markdown += `2. Click **Generate README**.\n`;
-    markdown += `3. Review the live preview.\n`;
-    markdown += `4. Use **Copy**, **Download**, or **Commit on GitHub**.\n\n`;
-    markdown += `### Build and run production\n\n`;
-    markdown += `\`\`\`bash\nnpm run build\nnpm start\n\`\`\`\n\n`;
-
-    markdown += `## 🧪 Testing\n\n\`\`\`bash\nnpm test\n\`\`\`\n\n`;
-
-    markdown += `## 🚀 Deployment\n\n`;
-    markdown += `Deploy easily to **Vercel**, **Netlify**, or any Node.js-compatible platform.\n\n`;
-    markdown += `### Environment Variables\n\n`;
-    markdown += `\`\`\`env\nNODE_ENV=production\nPORT=3000\n\`\`\`\n\n`;
-
-    markdown += `## 🗺️ Roadmap\n\n`;
-    markdown += `- [x] GitHub repository lookup and parsing\n`;
-    markdown += `- [x] Auto tech stack detection with visual badges\n`;
-    markdown += `- [x] Professional README generation with file tree\n`;
-    markdown += `- [x] Web UI with live preview and theme toggle\n`;
-    markdown += `- [ ] Multi-repo support (GitLab, Bitbucket)\n`;
-    markdown += `- [ ] Custom theme templates\n`;
-    markdown += `- [ ] Export to PDF and HTML\n\n`;
-
-    markdown += `## ❓ FAQ\n\n`;
-    markdown += `<details>\n<summary><strong>How does tech stack detection work?</strong></summary>\n\n`;
-    markdown += `ReadmeFlow analyzes the repository's \`package.json\` to automatically detect technologies and map them to visual badges.\n\n`;
-    markdown += `</details>\n\n`;
-    markdown += `<details>\n<summary><strong>Can I customize the generated README?</strong></summary>\n\n`;
-    markdown += `Yes! After generation, you can edit any section directly in the web interface, or copy the markdown and modify it in your preferred editor.\n\n`;
-    markdown += `</details>\n\n`;
-    markdown += `<details>\n<summary><strong>Is my GitHub data secure?</strong></summary>\n\n`;
-    markdown += `Absolutely. ReadmeFlow only accesses public repository data through the GitHub API. No sensitive data is stored or transmitted.\n\n`;
-    markdown += `</details>\n\n`;
-
-    markdown += `## 📁 Project Structure\n\n\`\`\`text\n${projectStructure || 'Project structure could not be fetched from GitHub.'}\n\`\`\`\n\n`;
-
-    markdown += `## 📄 License\n\nDistributed under the MIT License. See \`LICENSE\` for more information.\n\n`;
-
-    markdown += `## 👤 Author\n\n**${repoData.owner.login}** - [@${repoData.owner.login}](${repoData.owner.html_url})\n\n`;
-
-    markdown += `## 📞 Support\n\nFor support, open an issue on GitHub or reach out via email.\n\n`;
-
-    markdown += `---\n⭐ Star this repo if you found it helpful!\n`;
-
-    markdown += `\n> 💡 *Note: This repository's README documentation and flow structure have been generated using [read-me-flow.vercel.app](https://read-me-flow.vercel.app).*\n`;
-
+    const markdown = template.generate(data);
     setGeneratedReadme(markdown);
   };
 
@@ -398,12 +744,6 @@ export default function ReadmeGenerator() {
     element.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(generatedReadme);
     element.download = 'README.md';
     element.click();
-  };
-
-  const copyCliLink = () => {
-    navigator.clipboard.writeText(CLI_REPO_URL);
-    setCliCopied(true);
-    setTimeout(() => setCliCopied(false), 2000);
   };
 
   const commitReadmeToGitHub = async () => {
@@ -455,35 +795,13 @@ export default function ReadmeGenerator() {
             <span className="intro-pill">Free to use</span>
             <span className="intro-pill">Instant generation</span>
             <span className="intro-pill">Auto tech detection</span>
-            <span className="intro-pill">CLI generator</span>
             <span className="intro-pill">Download .md</span>
             <span className="intro-pill">GitHub commit</span>
+            <span className="intro-pill">Banners</span>
+            <span className="intro-pill">Badges</span>
+            <span className="intro-pill">GitHub Stats</span>
           </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              width: 'min(520px, 100%)',
-              margin: '1.25rem auto 0',
-            }}
-          >
-            <input
-              className="input"
-              readOnly
-              value={CLI_REPO_URL}
-              aria-label="CLI link"
-              style={{ minWidth: 0, flex: 1, height: '34px', fontSize: '12.5px' }}
-            />
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm"
-              onClick={copyCliLink}
-            >
-              {cliCopied ? 'Copied' : 'Copy'}
-            </button>
-          </div>
+          
         </section>
 
         <section className="panel panel-left">
@@ -599,6 +917,9 @@ export default function ReadmeGenerator() {
                       📄 Raw
                     </button>
                   </div>
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={switchTemplate}>
+                    🔄 Template ({templateIndex + 1}/{readmeTemplates.length})
+                  </button>
                   <button type="button" className="btn btn-ghost btn-sm" onClick={copyToClipboard}>
                     {copied ? '✅ Copied' : '📋 Copy'}
                   </button>
@@ -619,7 +940,7 @@ export default function ReadmeGenerator() {
               <div className="preview-body" style={{ maxHeight: 'calc(90vh - 96px)' }}>
                 {previewMode === 'rendered' ? (
                   <div className="md-rendered">
-                    <ReactMarkdown>{generatedReadme}</ReactMarkdown>
+                    <ReactMarkdown rehypePlugins={[rehypeRaw]}>{generatedReadme}</ReactMarkdown>
                   </div>
                 ) : (
                   <pre className="md-content">{generatedReadme}</pre>

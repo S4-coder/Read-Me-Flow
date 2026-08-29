@@ -1612,3 +1612,77 @@ a:hover {
     max-height: 300px;
   }
 }
+
+/* Banner Page within Badges Layout */
+.badges-layout .banner-preview {
+  position: sticky;
+  top: 96px;
+}
+
+.badges-layout .banner-preview-body {
+  flex: 1;
+  overflow: hidden;
+  padding: 1rem;
+  background: var(--bg-base);
+  max-height: none;
+}
+
+.badges-layout .banner-svg-wrap {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.badges-layout .banner-svg-wrap svg {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  display: block;
+}
+
+.badges-layout .banner-svg-wrap svg text {
+  animation: banner-text-pulse 4s ease-in-out infinite;
+}
+
+.badges-layout .banner-svg-wrap svg rect {
+  animation: banner-gradient-shift 6s ease-in-out infinite;
+}
+
+@keyframes banner-gradient-shift {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+@keyframes banner-text-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.88; }
+}
+
+@media (max-width: 900px) {
+  .badges-layout .banner-preview {
+    position: static;
+  }
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 28rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}

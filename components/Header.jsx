@@ -6,8 +6,10 @@ import { usePathname } from 'next/navigation';
 
 const pages = [
   { href: '/', label: 'Home' },
+  { href: '/badges', label: 'Badges' },
+  { href: '/banner', label: 'Banner' },
+  { href: '/github-stats', label: 'GitHub Stats' },
   { href: '/features', label: 'Features' },
-  { href: '/features/badges', label: 'Badges' },
   { href: '/privacy', label: 'Privacy' },
 ];
 
