@@ -14,8 +14,8 @@ const pages = [
 ];
 
 const githubUrl = 'https://github.com/S4-coder/Read-Me-Flow';
-const visiblePages = pages.slice(0, 4);
-const hiddenPages = pages.slice(4);
+const visiblePages = pages.slice(0, 1);
+const hiddenPages = pages.slice(1);
 
 export default function Header() {
   const pathname = usePathname();
