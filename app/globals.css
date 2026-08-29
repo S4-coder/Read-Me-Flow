@@ -1701,6 +1701,33 @@ a:hover {
   }
 }
 
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 0.5rem;
+}
+
+.social-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 620px) {
+  .badge-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .social-grid {
+    flex-direction: column;
+  }
+
+  .social-grid .badge-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 /* Banner Page within Badges Layout */
 .badges-layout .banner-preview {
   position: sticky;

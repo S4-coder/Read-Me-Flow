@@ -81,7 +81,7 @@ function CategoryCard({ title, items, color, onItemClick, selectedItems }) {
   return (
     <div className="card" style={{ padding: '1.25rem' }}>
       <h2 style={{ fontSize: '13px', fontWeight: 600, color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.875rem' }}>{title}</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))', gap: '0.5rem' }}>
+      <div className="badge-grid">
         {items.map((icon) => {
           const isSelected = selectedItems.some(t => t.slug === icon.slug);
           return (
@@ -208,7 +208,7 @@ export default function BadgesPage() {
 
             <div className="card" style={{ padding: '1.25rem' }}>
               <h2 style={{ fontSize: '13px', fontWeight: 600, color: '#a855f7', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.875rem' }}>Social &amp; Community Badges</h2>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div className="social-grid">
                 {iconCategories.social.map((social) => {
                   const isSelected = selectedSocial.some(s => s.name === social.name);
                   return (
