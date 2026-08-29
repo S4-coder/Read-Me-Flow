@@ -23,6 +23,7 @@ export default function Header() {
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     setMounted(true);
@@ -59,6 +60,10 @@ export default function Header() {
     ? `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`
     : 'Switch to light mode';
 
+  const filteredPages = pages.filter((page) =>
+    page.label.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <>
       <header className="navbar">
@@ -67,6 +72,15 @@ export default function Header() {
           <span>Readme Flow</span>
         </div>
         <nav className="navbar-actions">
+          <div className="nav-search">
+            <input
+              type="text"
+              className="nav-search-input"
+              placeholder="Search pages..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
           <button
             type="button"
             className="btn btn-ghost btn-sm"
@@ -76,7 +90,7 @@ export default function Header() {
             {themeLabel}
           </button>
           <div className="nav-page-links">
-            {pages.map((page) => (
+            {filteredPages.map((page) => (
               <Link
                 key={page.href}
                 href={page.href}
