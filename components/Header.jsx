@@ -14,6 +14,8 @@ const pages = [
 ];
 
 const githubUrl = 'https://github.com/S4-coder/Read-Me-Flow';
+const visiblePages = pages.slice(0, 4);
+const hiddenPages = pages.slice(4);
 
 export default function Header() {
   const pathname = usePathname();
@@ -60,7 +62,7 @@ export default function Header() {
     ? `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`
     : 'Switch to light mode';
 
-  const filteredPages = pages.filter((page) =>
+  const searchResults = pages.filter((page) =>
     page.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -80,6 +82,20 @@ export default function Header() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+            {searchQuery && searchResults.length > 0 && (
+              <div className="nav-search-dropdown">
+                {searchResults.map((page) => (
+                  <Link
+                    key={page.href}
+                    href={page.href}
+                    className={`nav-search-item ${pathname === page.href ? 'nav-search-item-active' : ''}`}
+                    onClick={() => setSearchQuery('')}
+                  >
+                    {page.label}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
           <button
             type="button"
@@ -90,7 +106,7 @@ export default function Header() {
             {themeLabel}
           </button>
           <div className="nav-page-links">
-            {filteredPages.map((page) => (
+            {visiblePages.map((page) => (
               <Link
                 key={page.href}
                 href={page.href}

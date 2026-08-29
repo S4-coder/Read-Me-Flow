@@ -332,6 +332,35 @@ a:hover {
   width: 220px;
 }
 
+.nav-search-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 180px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.nav-search-item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background var(--transition);
+}
+
+.nav-search-item:hover,
+.nav-search-item-active {
+  background: var(--bg-subtle);
+}
+
 .nav-page-links {
   display: flex;
   align-items: center;
